@@ -11,8 +11,7 @@ from DiscordSQLLite import find_discord_id_balance, adduser, find_user_exists, a
 
 
 BOT_PREFIX = ("?", "!")
-TOKEN = "NjExNzU5NDk2Njc4ODY2OTY5.XVYfiA.9NJG-8QdvgckcnHxNZzuVW-PqIg"  # Get at discordapp.com/developers/applications/me
-
+TOKEN = "NjExNzU5NDk2Njc4ODY2OTY5.XVuFwg.7kVn8M9HqLDVTLiGWq4rD6nl7v0" # Get at discordapp.com/developers/applications/me
 client = Bot(command_prefix=BOT_PREFIX)
 client.remove_command('help')
 
