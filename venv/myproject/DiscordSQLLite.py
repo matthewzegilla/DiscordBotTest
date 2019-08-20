@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from DiscordBotTest import pass_discord_id
+# from DiscordBotTest import pass_discord_id
 
 BASE = declarative_base()
 SQL_LITE_DB_NAME = 'Dischord' + '.db'
@@ -35,8 +35,8 @@ def find_discord_id_balance(discord_id_in):
     users = session.query(User).all()
     for i in users:
         if i.discord_id == discord_id_in:
-            print(i.discord_id + " has a balance of: " + i.user_balance)
             return i.user_balance
+            break
 
 
 def find_user_exists(discord_id_in):
@@ -44,19 +44,20 @@ def find_user_exists(discord_id_in):
     users = session.query(User).all()
     for i in users:
         if i.discord_id == discord_id_in:
+            print("true")
             return True
-        else:
-            return False
+            break
+
 
     session.close()
     # active_discord_user = "Matt#2929"
 
 
 def adduser(discord_id_in):
+    session = get_session()
     discorduser = User()
     discorduser.discord_id = discord_id_in
     discorduser.user_balance = 100
-    session = get_session()
     session.add(discorduser)
     session.commit()
     session.close()

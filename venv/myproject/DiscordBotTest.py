@@ -8,9 +8,7 @@ import json
 import requests
 from discord import Game
 from discord.ext.commands import Bot
-
-from DiscordSQLLite import find_discord_id_balance, adduser
-from DiscordSQLLite import find_user_exists
+from DiscordSQLLite import find_discord_id_balance, adduser, find_user_exists
 
 BOT_PREFIX = ("?", "!")
 TOKEN = "NjExNzU5NDk2Njc4ODY2OTY5.XVYfiA.9NJG-8QdvgckcnHxNZzuVW-PqIg"  # Get at discordapp.com/developers/applications/me
@@ -18,14 +16,12 @@ TOKEN = "NjExNzU5NDk2Njc4ODY2OTY5.XVYfiA.9NJG-8QdvgckcnHxNZzuVW-PqIg"  # Get at 
 client = Bot(command_prefix=BOT_PREFIX)
 
 
-@client.event
-async def on_ready():
-    await client.change_presence(game=Game(name="Pong"))
-    print("Logged in as " + client.user.name)
-
-
-@client.command()
-async def roll():
+@client.command(name='roll',
+                description="plays a dice game",
+                brief="dice",
+                aliases=['rolldice'],
+                pass_context=True)
+async def roll(context):
     player_roll = random.randrange(1, 7)
     computer_roll = random.randrange(1, 7)
     if player_roll > computer_roll:
@@ -65,9 +61,6 @@ async def weather(zip):
     await client.say("Current Temp is: " + str(current_temp_f))
 
 
-userbalances = [["Marley#4366"], [101]]
-
-
 @client.command(name='userbalance',
                 description="Provides users with their accounts balance.",
                 brief="Account Balances",
@@ -75,26 +68,25 @@ userbalances = [["Marley#4366"], [101]]
                 pass_context=True)
 async def user_balance(context):
     name = str(context.message.author)
-    if find_user_exists():
-        await client.say(name + " your balance is: " + find_discord_id_balance(name))
+    if find_user_exists(name):
+        await client.say(name + " your balance is: " + str(find_discord_id_balance(name)))
     else:
-        await client.say(name + " you do not have an account. Please use !new_account")
+        await client.say(name + " you do not have an account. Please use !addaccount")
 
-@client.command(name='addbalance',
-                description='adds 10 credits to balance.',
-                brief='Adds 10 Credits',
-                aliases=['ab'],
+
+@client.command(name='addaccount',
+                description='Adds a new user to the database if they dont exist',
+                aliases=['newaccount'],
                 pass_context=True)
-
-
 async def add_account(context):
     name = str(context.message.author)
-    if find_user_exists():
+    if find_user_exists(name):
         await client.say(name + " you already have an account. Try !userbalance")
     else:
         adduser(name)
+        await client.say(name + " your account has been created. have fun!")
 
-
+@client.command(pass_context=True)
 async def add_balance(context):
     name = str(context.message.author)
     if name in userbalances[0]:
@@ -113,7 +105,7 @@ async def list_servers():
         print("Current servers:")
         for server in client.servers:
             print(server.name)
-        await asyncio.sleep(10)
+        await asyncio.sleep(600)
 
 
 client.loop.create_task(list_servers())
