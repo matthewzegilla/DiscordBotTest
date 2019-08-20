@@ -61,3 +61,13 @@ def adduser(discord_id_in):
     session.add(discorduser)
     session.commit()
     session.close()
+
+def add_to_balance(discord_id_in, ammount):
+    session = get_session()
+    users = session.query(User).all()
+    for i in users:
+        if i.discord_id == discord_id_in:
+            i.user_balance = i.user_balance + ammount
+            break
+    session.commit()
+    session.close()
