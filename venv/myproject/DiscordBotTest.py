@@ -5,13 +5,14 @@ import asyncio
 import aiohttp
 import json
 import requests
+import os
 from discord import Game
 from discord.ext.commands import Bot
 from DiscordSQLLite import find_discord_id_balance, adduser, find_user_exists, add_to_balance
 
 
 BOT_PREFIX = ("?", "!")
-TOKEN = "NjExNzU5NDk2Njc4ODY2OTY5.XVuFwg.7kVn8M9HqLDVTLiGWq4rD6nl7v0" # Get at discordapp.com/developers/applications/me
+discord_api_token = os.environ['discord_token'] # Get at discordapp.com/developers/applications/me
 client = Bot(command_prefix=BOT_PREFIX)
 client.remove_command('help')
 
@@ -70,9 +71,9 @@ async def bitcoin():
                 description='finds the temperature of a zip code.',
                 pass_context=True)
 async def weather(context, zip):
-    api_token = 'd32530925739e01e4a83912ce05d8209'
+    weather_api_token = os.environ['weather_token']
     def get_weather():
-        url = "https://api.openweathermap.org/data/2.5/weather?zip={}&units=metric&appid={}".format(zip,api_token)
+        url = "https://api.openweathermap.org/data/2.5/weather?zip={}&units=metric&appid={}".format(zip,weather_api_token)
         r = requests.get(url)
         return r.json()
 
@@ -134,4 +135,4 @@ async def list_servers():
 
 
 client.loop.create_task(list_servers())
-client.run(TOKEN)
+client.run(discord_api_token)
