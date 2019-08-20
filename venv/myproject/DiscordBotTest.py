@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # Work with Python 3.6
-# Cool
 import random
 import asyncio
 import aiohttp
@@ -10,10 +9,28 @@ from discord import Game
 from discord.ext.commands import Bot
 from DiscordSQLLite import find_discord_id_balance, adduser, find_user_exists, add_to_balance
 
+
 BOT_PREFIX = ("?", "!")
 TOKEN = "NjExNzU5NDk2Njc4ODY2OTY5.XVYfiA.9NJG-8QdvgckcnHxNZzuVW-PqIg"  # Get at discordapp.com/developers/applications/me
 
 client = Bot(command_prefix=BOT_PREFIX)
+client.remove_command('help')
+
+
+@client.command(name='help_me',
+                description='lists commands',
+                aliases=['commands', 'readme'],
+                pass_context=False)
+async def help_me():
+    commands = """  
+                    
+!roll           -   plays a simple dice game.
+!bitcoin        -   displays the price of bitcoin in USD.
+!weather (zip)  -   displays temperature at zip code entered, don't put ( ).
+!userbalance    -   checks your credit balance.
+!addaccount     -   makes you a credit account if you are a new user.
+                                                                                                    """
+    await client.say(commands)
 
 
 @client.command(name='roll',
@@ -35,31 +52,37 @@ async def roll(context):
     await client.say(response)
 
 
-@client.command()
+@client.command(name='bitcoin',
+                description='find the price of btc/usd',
+                brief='btc price',
+                aliases=['btc'],
+                pass_context=False)
 async def bitcoin():
     url = 'https://api.coindesk.com/v1/bpi/currentprice/BTC.json'
     async with aiohttp.ClientSession() as session:  # Async HTTP request
         raw_response = await session.get(url)
         response = await raw_response.text()
         response = json.loads(response)
-        await client.say("Bitcoin price is: $" + response['temp']['humidity'][''])
+        btc_price = response['bpi']['USD']['rate']
+        await client.say("Bitcoin price is: $" + btc_price)
 
 
-@client.command(pass_context=True)
+@client.command(name='weather',
+                description='finds the temperature of a zip code.',
+                pass_context=True)
 async def weather(context, zip):
-    # api_token = 'd32530925739e01e4a83912ce05d8209'
+    api_token = 'd32530925739e01e4a83912ce05d8209'
     def get_weather():
-        url = "https://api.openweathermap.org/data/2.5/weather?zip={}&units=metric&appid={}".format(zip,
-                                                                                    'd32530925739e01e4a83912ce05d8209')
+        url = "https://api.openweathermap.org/data/2.5/weather?zip={}&units=metric&appid={}".format(zip,api_token)
         r = requests.get(url)
         return r.json()
 
     name = str(context.message.author)
-    x = get_weather()
-    y = x["main"]
-    current_temp = y["temp"]
-    current_temp_f = 9 / 5 * current_temp + 32
-    await client.say(name + " Current Temp is: " + str(current_temp_f))
+    w = get_weather()
+    w_main = w["main"]
+    current_temp = w_main["temp"]
+    current_temp_f = round(9 / 5 * current_temp + 32,1)
+    await client.say(name + ", current temp is: " + str(current_temp_f) + "° in " + str(zip))
 
 
 @client.command(name='userbalance',
@@ -70,9 +93,9 @@ async def weather(context, zip):
 async def user_balance(context):
     name = str(context.message.author)
     if find_user_exists(name):
-        await client.say(name + " your balance is: " + str(find_discord_id_balance(name)))
+        await client.say(name + ", your balance is: " + str(find_discord_id_balance(name)))
     else:
-        await client.say(name + " you do not have an account. Please use !addaccount")
+        await client.say(name + ", you do not have an account. Please use !addaccount")
 
 
 @client.command(name='addaccount',
@@ -82,10 +105,10 @@ async def user_balance(context):
 async def add_account(context):
     name = str(context.message.author)
     if find_user_exists(name):
-        await client.say(name + " you already have an account. Try !userbalance")
+        await client.say(name + ", you already have an account. Try !userbalance")
     else:
         adduser(name)
-        await client.say(name + " your account has been created. have fun!")
+        await client.say(name + ", your account has been created. have fun!")
 
 @client.command(name='addbalance',
                 description='Adds money to a users account',
@@ -100,19 +123,6 @@ async def add_balance(context, ammount):
                                                                                     str(find_discord_id_balance(name)))
     else:
         await client.say(name + ", I cannot find an account for you. Try !addaccount")
-
-
-# @client.command(pass_context=True)
-# async def add_balance(context, ammount):
-#     name = str(context.message.author)
-#     if name in userbalances[0]:
-#         i = userbalances[0].index(name)
-#         userbalances[1][i] = userbalances[1][i] + 10
-#         await client.say(name + " your balance is: " + str(userbalances[1][i]))
-#         return userbalances
-#     else:
-#         await client.say(name + " you do not have an open account, please use !ub to create one.")
-#         return userbalances
 
 
 async def list_servers():
